@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Empaquetar - Com empaquetar i distribuïr els nostres paquets de Python</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Roboto);
+      @import url(https://fonts.googleapis.com/css?family=Roboto+Mono);
+
+      body { font-family: 'Roboto'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Roboto Mono'; font-size: 0.6em }
+      .small {
+        font-size: 0.8em;
+      }
+      a:link, a:visited {
+        color: #E40066;
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle
+count: false
+# Com empaquetar
+## Empaquetar i distribuïr els nostres paquests de Python
+
+![PyGRN](https://avatars1.githubusercontent.com/u/28831124?v=4&s=200)
+
+[Eduard Carreras i Nadal](mailto:ecarreras@gmail.com)
+
+31/03/2022 - PyGRN #22
+
+[![](https://i.creativecommons.org/l/by-sa/4.0/88x31.png)](http://creativecommons.org/licenses/by-sa/4.0/)
+
+---
+
+# Qui sóc jo?
+
+- Sóc un infiltrat en el món del software (sóc teleco)
+- Apassionat del software i del proćes **art**esanal.
+- Co-Fundador de [GISCE-TI, S.L](http://gisce.net)
+- Desenvolupant en Python des del 2007 (Python ❤️)
+- Amant del programari lliure
+- [LinkedIn](https://www.linkedin.com/in/ecarreras/), [Twitter](https://twitter.com/ecarreras)
+  i [GitHub](https://github.com/ecarreras)
+
+---
+# Agenda
+
+  1. Què és un paquet de Python
+  2. Estructura d'un paquet
+  3. Integrar amb scripts (CLI)
+  4. Integrar amb tests
+  5. Què són els `entry_points`?
+  6. Alternatives a setuptools
+  7. Referències
+
+---
+# Què és un paquet de Python
+
+- Una colecció de mòduls agrupats per un objectiu/funcionalitat (lliberia).
+  - Ex. [Requests](https://docs.python-requests.org/en/latest/): comunicació HTTP
+  - Ex. [SQLAlchemy](https://www.sqlalchemy.org/): ORM per diferents bases de dades
+- La manera més comú d'instal·lar un paquest és a través de `pip` i el repository [Pypi](https://pypi.org/)
+  - Ex. `python3 -m pip install requests`
+
+## Però avui no apendrem a instal·lar i gestionar entorns!
+
+- Això ho deixem per alguna altre sessió 😉
+
+## Avui farem i publicarem els nostres paquests! 🔝
+
+
+???
+
+- https://stackoverflow.com/questions/62983756/what-is-pyproject-toml-file-for
+
+
+---
+# Estructura d'un paquet
+
+### Tenim el següent projecte
+
+```
+sampleproject/
+└── src/
+    └── sample/
+        ├── __init__.py
+        └── simple.py
+```
+- On el contingut de `simple.py` és:
+
+```python
+def add_one(number):
+    return number + 1
+```
+
+---
+# Estructura d'un paquet
+
+```
+sampleproject/
+├── LICENSE
+├── pyproject.toml(*)
+├── README.md
+├── setup.py ⬅️
+├── MANIFEST.in
+├── requirements.txt
+├── src/
+│   └── sample/
+│       ├── __init__.py
+│       └── simple.py
+└── tests/
+```
+
+- Hi ha el fitxer `setup.py` que s'utilitzar per definir el paquet
+- Es pot fer servir `setup.cfg` que és el mateix, però no és dínamic.
+  - 💡 El `.py` s'executa en el moment d'insta·lació.
+  - ⚠️ Si hi ha algún error en el `setup.py` no instal·larà.
+
+---
+
+# Fitxer setup.py
+
+```python
+import setuptools
+
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
+with open("requirements.txt") as r:
+    install_requires = [x.strip() for x in r.readlines()]
+
+setuptools.setup(
+    name="sample-ecarreras",
+    version="0.0.1",
+    author="Example Author",
+    author_email="author@example.com",
+    description="A small example package",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/pypa/sampleproject",
+    project_urls={
+        "Bug Tracker": "https://github.com/pypa/sampleproject/issues",
+    },
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
+    package_dir={"": "src"},
+    install_requires=install_requires,
+    packages=setuptools.find_packages(where="src"),
+    python_requires=">=3.6",
+)
+```
+---
+# Pujar el nostre paquet
+
+- Farem servir una utilitat que es diu [twine](https://twine.readthedocs.io/en/stable/)
+- Necessitem un [compte a Pypi](https://pypi.org/account/register/)
+
+```
+python3 -m pip install twine
+python3 setup.py sdist  # Creem el paquet a la carpeta /dist
+twine upload dist/sample-ecarreras-0.0.1.tar.gz
+```
+
+- Ara ja el podem instal·lar! 👏
+
+```
+python3 -m pip install sample-ecarreras
+```
+
+- Podem automatitzar-ho amb [Github Actions](https://github.com/pypa/sampleproject/blob/main/.github/workflows/release.yml), de forma
+que quan fem un tag al repositori ens pugi el paquet
+
+---
+# Integrar amb scripts (CLI)
+
+- Moltes vegades volem crear utilitzats a través de comandes
+- Farem servir [Click](https://click.palletsprojects.com/) però podem fer servir només stdlib
+
+```
+├── src/
+│   └── sample/
+│       ├── __init__.py
+│       └── simple.py
+│       └── cli.py
+``` 
+
+ ```python
+import click
+from sample.simple import add_one
+
+@click.command()
+@click.argument('number', nargs=1, type=click.INT)
+def main(number):
+    print(add_one(number))
+
+if __name__ == '__main__':
+    main()
+```
+
+- Això ja es pot executar amb l'interpret de python, però volem que ens crei un executable
+del tipus:
+
+```
+$ add_one 6
+7
+```
+---
+# Integrar amb scripts (CLI)
+
+- Utilitzarem un paràmetre anomenat [`console_scripts`](https://setuptools.pypa.io/en/latest/userguide/entry_point.html) del `setup.py`
+
+```python
+setup(
+    entry_points={
+      'console_scripts': [
+          'add_one = sample.cli:main'
+      ]
+    }
+)
+```
+
+- Es pot indicar quin nom tindrà l'script (add_one en aquest cas)
+- On es troba la funció que ha d'executar (la funció `main` que es troba a `sample.cli` )
+
+
+---
+# Què són els `entry_points`?
+
+- Ho hem fet servir abans per crear scripts executables, però serveix per molt més
+- Es una forma que ens permet que altres paquetes intereccionin amb el nostre, com
+un sistema de *plug-ins*.
+- Funciona amb una clau que té diferents valors
+
+## Com els podem descobrir?
+
+```python
+from importlib import metadata
+eps = metadata.entry_points()['my_entry_point_name']
+for ep in eps:
+    plugin = ep.load()
+    plugin()
+```
+
+- Exemple de [plugins amb PyTest](https://docs.pytest.org/en/latest/how-to/writing_plugins.html#setuptools-entry-points)
+
+---
+# Alternatives a setuptools
+
+- Fins fa un temps la única manera de crear i distribuïr paquets era amb `setuptools`
+  - `setuptools` no forma part de l'stdlib, què passa si no el tenim?
+
+## pyproject.toml
+
+- Entra en joc el `pyproject.toml`, aquest fitxer ens defineix com construir el paquet
+
+```toml
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+```
+
+- Aquest moviment, ha obert la manera de gestionar paquets i ens permet fer servir altres eines
+com [Poetry](https://python-poetry.org/), [Flit](https://flit.pypa.io/en/latest/) o [PDM](https://pdm.fming.dev/)
+
+### PEPs
+- [PEP-518](https://peps.python.org/pep-0518/), [PEP-517](https://peps.python.org/pep-0517/), [PEP-621](https://peps.python.org/pep-0621/),
+[PEP-660](https://peps.python.org/pep-0660/)
+
+
+---
+# Referències
+
+- [Python Packaging User Guide](https://packaging.python.org/en/latest/)
+- [Python Packaging Authority](https://www.pypa.io/en/latest/)
+- [Llista de classifacts pels paquests](https://pypi.org/classifiers/)
+- [GitHub PyPA](https://github.com/pypa)
+
+---
+
+class: center, middle
+
+# Preguntes?
+# 🙈 🙉 🙊
+
+---
+class: center, middle
+
+# Moltes gràcies!
+
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+        highlightStyle: 'darcula',
+        highlightLanguage: 'remark',
+        highlightLines: true,
+        slideNumberFormat: '%current%/%total%',
+        ratio: '4:3'
+      });
+    </script>
+  </body>
+</html>
