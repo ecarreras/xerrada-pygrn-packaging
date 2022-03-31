@@ -64,17 +64,17 @@ count: false
 ---
 # Què és un paquet de Python
 
-- Una colecció de mòduls agrupats per un objectiu/funcionalitat (lliberia).
+- Una col·lecció de mòduls agrupats per un objectiu/funcionalitat (llibreria).
   - Ex. [Requests](https://docs.python-requests.org/en/latest/): comunicació HTTP
   - Ex. [SQLAlchemy](https://www.sqlalchemy.org/): ORM per diferents bases de dades
-- La manera més comú d'instal·lar un paquest és a través de `pip` i el repository [Pypi](https://pypi.org/)
+- La manera més comuna d'instal·lar un paquet és a través de `pip` i el repositori [Pypi](https://pypi.org/)
   - Ex. `python3 -m pip install requests`
 
 ## Però avui no apendrem a instal·lar i gestionar entorns!
 
 - Això ho deixem per alguna altre sessió 😉
 
-## Avui farem i publicarem els nostres paquests! 🔝
+## Avui farem i publicarem els nostres paquets! 🔝
 
 
 ???
@@ -119,10 +119,10 @@ sampleproject/
 └── tests/
 ```
 
-- Hi ha el fitxer `setup.py` que s'utilitzar per definir el paquet
-- Es pot fer servir `setup.cfg` que és el mateix, però no és dínamic.
-  - 💡 El `.py` s'executa en el moment d'insta·lació.
-  - ⚠️ Si hi ha algún error en el `setup.py` no instal·larà.
+- Hi ha el fitxer `setup.py` que s'utilitza per definir el paquet
+- Es pot fer servir `setup.cfg` que és el mateix, però no és dinàmic.
+  - 💡 El `.py` s'executa en el moment d'instal·lació.
+  - ⚠️ Si hi ha algun error en el `setup.py` no instal·larà.
 
 ---
 
@@ -208,7 +208,7 @@ if __name__ == '__main__':
     main()
 ```
 
-- Això ja es pot executar amb l'interpret de python, però volem que ens crei un executable
+- Això ja es pot executar amb l'intèrpret de python, però volem que ens creï un executable
 del tipus:
 
 ```
@@ -238,7 +238,7 @@ setup(
 # Què són els `entry_points`?
 
 - Ho hem fet servir abans per crear scripts executables, però serveix per molt més
-- Es una forma que ens permet que altres paquetes intereccionin amb el nostre, com
+- És una forma que ens permet que altres paquets interaccionin amb el nostre, com
 un sistema de *plug-ins*.
 - Funciona amb una clau que té diferents valors
 
@@ -257,7 +257,7 @@ for ep in eps:
 ---
 # Alternatives a setuptools
 
-- Fins fa un temps la única manera de crear i distribuïr paquets era amb `setuptools`
+- Fins fa un temps l'única manera de crear i distribuir paquets era amb `setuptools`
   - `setuptools` no forma part de l'stdlib, què passa si no el tenim?
 
 ## pyproject.toml
